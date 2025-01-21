@@ -29,6 +29,7 @@ processors:
           - replace_all_patterns(attributes, "key", "\\.", "_") 
 
   tail_sampling:
+    decision_wait: 10s
     policies:
       [
           {
