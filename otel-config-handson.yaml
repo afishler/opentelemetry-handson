@@ -3,14 +3,17 @@ receivers:
     protocols:
       grpc:
         endpoint: localhost:4317
+      http:
+        endpoint: localhost:4318
 
 processors:
+  batch: {}
 
 exporters:
   debug:
     verbosity: detailed  
   logzio/logs:
-    account_token: xxxxxxxxxxxxxxxxxxx
+    account_token: xxxxxxxxxxxxxxx
     region: us
     headers:
       user-agent: "akamai-handson-29-01-25"
@@ -21,7 +24,14 @@ service:
     traces:
       receivers:
       - otlp
-      processors: []
+      processors: [batch]
+      exporters:
+      - debug
+      - logzio/logs
+    logs:
+      receivers:
+      - otlp
+      processors: [batch]
       exporters:
       - debug
       - logzio/logs
