@@ -39,7 +39,7 @@ processors:
           {
             name: slow-traces-policy,
             type: latency,
-            latency: {threshold_ms: "1000" }            
+            latency: {threshold_ms: 1000 }            
           }
       ]
 
