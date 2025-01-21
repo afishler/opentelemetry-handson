@@ -1,0 +1,51 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: localhost:4317
+      http:
+        endpoint: localhost:4318
+
+processors:
+  batch: {}
+  transform/log_level:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        statements:
+          # set log_level
+          - set(attributes["log_level"], "INFO")
+          - set(attributes["log_level"], "DEBUG") where (IsMatch(body, ".*\\b(?i:debug)\\b.*"))
+          - set(attributes["log_level"], "WARNING") where (IsMatch(body, ".*\\b(?i:warning|warn)\\b.*"))
+          - set(attributes["log_level"], "ERROR") where (IsMatch(body, ".*(?i:(?:error|fail|failure|exception|panic)).*"))
+exporters:
+  debug:
+    verbosity: detailed  
+  logzio/logs:
+    account_token: xxxxxxxxxxxxxxxxxx
+    region: us
+    headers:
+      user-agent: "akamai-handson-29-01-25"
+  logzio/traces:
+    account_token: yyyyyyyyyyyyyyyyyyy
+    region: us
+    headers:
+      user-agent: "akamai-handson-29-01-25"
+
+
+service:
+  pipelines:
+    traces:
+      receivers:
+      - otlp
+      processors: [batch]
+      exporters:
+      - debug
+      - logzio/traces
+    logs:
+      receivers:
+      - otlp
+      processors: [transform/log_level,batch]
+      exporters:
+      - debug
+      - logzio/logs
