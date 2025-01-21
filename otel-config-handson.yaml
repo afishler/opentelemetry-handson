@@ -7,9 +7,10 @@ receivers:
 processors:
 
 exporters:
-  logging:
-  logzio/logs-dup:
-    account_token: xxxxxxxxxxx
+  debug:
+    verbosity: detailed  
+  logzio/logs:
+    account_token: xxxxxxxxxxxxxxxxxxx
     region: us
     headers:
       user-agent: "akamai-handson-29-01-25"
@@ -22,4 +23,5 @@ service:
       - otlp
       processors: []
       exporters:
-      - logging
+      - debug
+      - logzio/logs
