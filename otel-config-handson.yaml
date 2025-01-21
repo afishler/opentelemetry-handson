@@ -21,13 +21,6 @@ exporters:
 
 service:
   pipelines:
-    traces:
-      receivers:
-      - otlp
-      processors: [batch]
-      exporters:
-      - debug
-      - logzio/logs
     logs:
       receivers:
       - otlp
