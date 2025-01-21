@@ -18,6 +18,31 @@ processors:
           - set(attributes["log_level"], "DEBUG") where (IsMatch(body, ".*\\b(?i:debug)\\b.*"))
           - set(attributes["log_level"], "WARNING") where (IsMatch(body, ".*\\b(?i:warning|warn)\\b.*"))
           - set(attributes["log_level"], "ERROR") where (IsMatch(body, ".*(?i:(?:error|fail|failure|exception|panic)).*"))
+  transform/dedot:
+    error_mode: ignore
+    log_statements:
+      - context: resource
+        statements:
+          - replace_all_patterns(attributes, "key", "\\.", "_")
+      - context: log
+        statements:
+          - replace_all_patterns(attributes, "key", "\\.", "_") 
+
+  tail_sampling:
+    policies:
+      [
+          {
+            name: error-in-policy,
+            type: status_code,
+            status_code: {status_codes: [ERROR]}
+          },
+          {
+            name: slow-traces-policy,
+            type: latency,
+            latency: {threshold_ms: "1000" }            
+          }
+      ]
+
 exporters:
   debug:
     verbosity: detailed  
@@ -27,7 +52,7 @@ exporters:
     headers:
       user-agent: "akamai-handson-29-01-25"
   logzio/traces:
-    account_token: yyyyyyyyyyyyyyyyyyy
+    account_token: yyyyyyyyyyyyyyyyyyyy
     region: us
     headers:
       user-agent: "akamai-handson-29-01-25"
@@ -38,14 +63,14 @@ service:
     traces:
       receivers:
       - otlp
-      processors: [batch]
+      processors: [tail_sampling, batch]
       exporters:
       - debug
       - logzio/traces
     logs:
       receivers:
       - otlp
-      processors: [transform/log_level,batch]
+      processors: [transform/dedot, transform/log_level,batch]
       exporters:
       - debug
       - logzio/logs
